@@ -1,5 +1,5 @@
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import json
 import time
 import hmac,hashlib
@@ -18,7 +18,7 @@ class Cryptsy:
         # Add timestamps if there isnt one but is a datetime
         if('return' in after):
             if(isinstance(after['return'], list)):
-                for x in xrange(0, len(after['return'])):
+                for x in range(0, len(after['return'])):
                     if(isinstance(after['return'][x], dict)):
                         if('datetime' in after['return'][x] and 'timestamp' not in after['return'][x]):
                             after['return'][x]['timestamp'] = float(createTimeStamp(after['return'][x]['datetime']))
@@ -28,15 +28,15 @@ class Cryptsy:
     def api_query(self, method, req={}):
 
         if(method == "marketdata" or method == "orderdata" or method == "marketdatav2"):
-            ret = urllib2.urlopen(urllib2.Request('http://pubapi.cryptsy.com/api.php?method=' + method))
+            ret = urllib.request.urlopen(urllib.request.Request('http://pubapi.cryptsy.com/api.php?method=' + method))
             return json.loads(ret.read())
         elif(method == "singlemarketdata" or method == "singleorderdata"):
-            ret = urllib2.urlopen(urllib2.Request('http://pubapi.cryptsy.com/api.php?method=' + method + '&marketid=' + str(req['marketid'])))
+            ret = urllib.request.urlopen(urllib.request.Request('http://pubapi.cryptsy.com/api.php?method=' + method + '&marketid=' + str(req['marketid'])))
             return json.loads(ret.read())
         else:
             req['method'] = method
             req['nonce'] = int(time.time())
-            post_data = urllib.urlencode(req)
+            post_data = urllib.parse.urlencode(req)
 
             sign = hmac.new(self.Secret, post_data, hashlib.sha512).hexdigest()
             headers = {
@@ -44,7 +44,7 @@ class Cryptsy:
                 'Key': self.APIKey
             }
 
-            ret = urllib2.urlopen(urllib2.Request('https://www.cryptsy.com/api', post_data, headers))
+            ret = urllib.request.urlopen(urllib.request.Request('https://www.cryptsy.com/api', post_data, headers))
             jsonRet = json.loads(ret.read())
             return self.post_process(jsonRet)
 
